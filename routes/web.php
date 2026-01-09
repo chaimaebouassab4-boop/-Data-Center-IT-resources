@@ -1,5 +1,6 @@
 <?php
 
+use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -15,7 +16,11 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
     $resources = $query->get();
     $categories = \App\Models\Category::all();
     
-    return view('welcome', compact('resources', 'categories'));
+    //return view('welcome', compact('resources', 'categories'));
+    return Inertia::render('App', [
+    'resources' => $resources,
+    'categories' => $categories
+]);
 })->name('home'); // ✅ AJOUTÉ ICI
 
 Route::get('/timeline', [\App\Http\Controllers\TimelineController::class, 'index'])->name('timeline');
