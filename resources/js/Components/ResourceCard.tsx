@@ -90,7 +90,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, role, onReserve, 
       <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
         {role === UserRole.GUEST ? (
           <a
-            href="/login"
+            href="/auth"
             className="text-xs font-medium text-slate-400 italic transition-all duration-300 ease-in-out hover:text-blue-500 hover:underline cursor-pointer"
           >
             Login to reserve

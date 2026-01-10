@@ -12,7 +12,45 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login');
+        //return view('auth.login');
+        return \Inertia\Inertia::render('AuthPage', ['initialView' => 'login']);
+    }
+
+    public function showRegister()
+    {
+        return \Inertia\Inertia::render('AuthPage', ['initialView' => 'signup']);
+    }
+
+    public function register(Request $request)
+    {
+        // 1. Validation
+        $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        // 2. Création de l'utilisateur avec concaténation du nom
+        $user = User::create([
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => 2, // 2 = User role (id géré côté serveur)
+        ]);
+
+        // 3. Connexion automatique
+        Auth::login($user);
+
+        // 4. Log
+        \App\Models\Log::create([
+            'user_id' => $user->id,
+            'action' => 'Register',
+            'details' => 'New user account created with role_id 2',
+        ]);
+
+        // 5. Redirection
+        return redirect('/');
     }
 
     public function login(Request $request)
@@ -22,10 +60,10 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            
+
             \App\Models\Log::create([
                 'user_id' => Auth::id(),
                 'action' => 'Login',
@@ -34,7 +72,7 @@ class AuthController extends Controller
 
             // Redirect based on role
             $user = Auth::user();
-            return redirect('/');//$this->redirectBasedOnRole($user);
+            return redirect('/'); //$this->redirectBasedOnRole($user);
         }
 
         return back()->withErrors([

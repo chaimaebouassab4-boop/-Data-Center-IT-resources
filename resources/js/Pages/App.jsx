@@ -132,7 +132,7 @@ const App = ({ resources, auth, isLoggedIn }) => {
                     <div className="flex items-center gap-4">
                         {!isLoggedIn && <>
                             <a
-                                href="/login"
+                                href="/auth"
                                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md 
                            hover:bg-blue-700 transition-colors duration-300 ease-in-out
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -172,7 +172,7 @@ const App = ({ resources, auth, isLoggedIn }) => {
 
                         <div className="h-8 w-px bg-slate-200 mx-1"></div>
 
-                        <button onClick={() => isLoggedIn ? '' : location.href = '/login'} className="flex items-center gap-3 pl-2 pr-1 py-1 hover:bg-slate-100 rounded-xl transition-all cursor-pointer">
+                        <button onClick={() => isLoggedIn ? '' : location.href = '/auth'} className="flex items-center gap-3 pl-2 pr-1 py-1 hover:bg-slate-100 rounded-xl transition-all cursor-pointer">
                             <div className="text-right hidden sm:block">
                                 <p className="text-xs font-bold text-slate-900">{isLoggedIn && auth.user.name}</p>
                                 <p className="text-[10px] text-slate-500 uppercase tracking-tighter">{currentRole}</p>

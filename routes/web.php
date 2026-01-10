@@ -48,9 +48,16 @@ Route::middleware('auth')->group(function () {
 });
 
 // Authentication Routes
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::get('/auth', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+// Route pour afficher le formulaire d'inscription
+Route::get('/auth/signup', [AuthController::class, 'showRegister'])->name('register');
+
+// Route pour traiter l'inscription (méthode POST)
+Route::post('/register', [AuthController::class, 'register']);
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
