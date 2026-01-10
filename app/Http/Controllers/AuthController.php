@@ -22,6 +22,7 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
@@ -33,7 +34,7 @@ class AuthController extends Controller
 
             // Redirect based on role
             $user = Auth::user();
-            return $this->redirectBasedOnRole($user);
+            return redirect('/');//$this->redirectBasedOnRole($user);
         }
 
         return back()->withErrors([

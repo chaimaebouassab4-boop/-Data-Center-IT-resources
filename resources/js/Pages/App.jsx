@@ -1,15 +1,22 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserRole } from '../types';
 import Sidebar from '../Components/Sidebar';
 import Dashboard from '../views/Dashboard';
 import Catalog from '../views/Catalog';
-import { Bell, User, Search, ShieldCheck } from 'lucide-react';
+import { Bell, User, Search, ShieldCheck, LogIn } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
-const App = () => {
-    const [currentRole, setCurrentRole] = useState(UserRole.ADMIN);
-    const [activeTab, setActiveTab] = useState('dashboard');
+const App = ({ resources, auth, isLoggedIn }) => {
+
+    const [currentRole, setCurrentRole] = useState(auth.role || UserRole.GUEST);
+    const [activeTab, setActiveTab] = useState(isLoggedIn ? 'dashboard' : 'catalog');
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+     useEffect(() => {
+        setCurrentRole(auth.role || UserRole.GUEST);
+        setActiveTab(isLoggedIn ? 'dashboard' : 'catalog');
+    }, [auth.role]);
 
     // Mock roles switching for demo purposes
     const cycleRole = () => {
@@ -29,9 +36,9 @@ const App = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
-                return <Dashboard role={currentRole} />;
+                return <Dashboard resources={resources} role={currentRole} />;
             case 'catalog':
-                return <Catalog role={currentRole} />;
+                return <Catalog resources={resources} role={currentRole} />;
             case 'my-reservations':
                 return (
                     <div className="flex flex-col items-center justify-center h-64 text-slate-400">
@@ -108,23 +115,45 @@ const App = () => {
                 currentRole={currentRole}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
-                onLogout={() => alert('Signing out...')}
+                onLogout={() => {
+                    if (confirm("Are you sure you want to log out?")) {
+                        router.post('/logout', {}, {
+                            onSuccess: () => { }
+                        });
+                        //location.href = '/';
+                    }
+                }}
+                isLoggedIn={isLoggedIn}
             />
 
             <main className="pl-64 min-h-screen flex flex-col">
                 {/* Header bar */}
                 <header className="h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30 px-8 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={cycleRole}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
-                        >
-                            <ShieldCheck size={14} />
-                            Switch Persona
-                        </button>
-                        <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded">
-                            Current: <b className="text-slate-900 capitalize">{currentRole.replace('_', ' ').toLowerCase()}</b>
-                        </span>
+                        {!isLoggedIn && <>
+                            <a
+                                href="/login"
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md 
+                           hover:bg-blue-700 transition-colors duration-300 ease-in-out
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                                <LogIn size={18} /> {/* Icône Lucide */}
+                                Login
+                            </a>
+                            <p className="text-xs font-medium text-slate-500 italic">
+                                Log in to book
+                            </p>
+                        </>
+                        }
+                        {/*
+                            <button
+                                onClick={cycleRole}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
+                            >
+                                <ShieldCheck size={14} />
+                                Switch
+                            </button>
+                        */}
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -133,16 +162,19 @@ const App = () => {
                             <input type="text" placeholder="Global search..." className="bg-transparent border-none text-sm outline-none w-48" />
                         </div>
 
-                        <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
-                        </button>
+                        {/* Notifications */}
+                        {isLoggedIn &&
+                            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                                <Bell size={20} />
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
+                            </button>
+                        }
 
                         <div className="h-8 w-px bg-slate-200 mx-1"></div>
 
-                        <button className="flex items-center gap-3 pl-2 pr-1 py-1 hover:bg-slate-100 rounded-xl transition-all">
+                        <button onClick={() => isLoggedIn ? '' : location.href = '/login'} className="flex items-center gap-3 pl-2 pr-1 py-1 hover:bg-slate-100 rounded-xl transition-all cursor-pointer">
                             <div className="text-right hidden sm:block">
-                                <p className="text-xs font-bold text-slate-900">John Doe</p>
+                                <p className="text-xs font-bold text-slate-900">{isLoggedIn && auth.user.name}</p>
                                 <p className="text-[10px] text-slate-500 uppercase tracking-tighter">{currentRole}</p>
                             </div>
                             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">

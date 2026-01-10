@@ -9,9 +9,10 @@ interface SidebarProps {
   activeTab: string;
   onTabChange: (id: string) => void;
   onLogout: () => void;
+  isLoggedIn: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentRole, activeTab, onTabChange, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentRole, activeTab, onTabChange, onLogout, isLoggedIn }) => {
   const filteredItems = NAV_ITEMS.filter(item => item.roles.includes(currentRole));
 
   return (
@@ -31,11 +32,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentRole, activeTab, onTabChange, 
           <button
             key={item.id}
             onClick={() => onTabChange(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === item.id 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+              }`}
           >
             {item.icon}
             {item.label}
@@ -48,13 +48,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentRole, activeTab, onTabChange, 
           <p className="text-xs text-slate-500 mb-1">Signed in as</p>
           <p className="text-sm font-semibold truncate capitalize">{currentRole.replace('_', ' ').toLowerCase()}</p>
         </div>
-        <button 
-          onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-        >
-          <LogOut size={18} />
-          Sign Out
-        </button>
+        {isLoggedIn && (
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+          >
+            <LogOut size={18} />
+            Sign Out
+          </button>
+        )}
       </div>
     </aside>
   );

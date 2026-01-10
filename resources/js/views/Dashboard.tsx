@@ -29,9 +29,10 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
 interface DashboardProps {
   role: UserRole;
+  resources?: any[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ role }) => {
+const Dashboard: React.FC<DashboardProps> = ({ role, resources }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header>
@@ -41,7 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({ role }) => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard label="Total Resources" value="248" icon={<Server size={20} />} trend={{ value: 4, isUp: true }} />
+        <StatCard label="Total Resources" value={resources?.length || 0} icon={<Server size={20} />} trend={{ value: 4, isUp: true }} />
         <StatCard label="Active Bookings" value="86" icon={<CalendarCheck size={20} />} trend={{ value: 12, isUp: true }} />
         <StatCard label="Pending Approval" value="14" icon={<Clock size={20} />} trend={{ value: 2, isUp: false }} />
         <StatCard label="Active Users" value="1,204" icon={<Users size={20} />} trend={{ value: 8, isUp: true }} />

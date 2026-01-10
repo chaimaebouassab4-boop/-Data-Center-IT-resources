@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 
 // Public Routes - AJOUT DU NOM 'home'
 Route::get('/', function (\Illuminate\Http\Request $request) {
+    // 1. On récupère les ressources de base (communs à tous)
     $query = \App\Models\Resource::with('category')->where('is_active', true);
     
     if ($request->has('category_id') && $request->category_id != '') {
@@ -15,13 +16,27 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
 
     $resources = $query->get();
     $categories = \App\Models\Category::all();
-    
-    //return view('welcome', compact('resources', 'categories'));
+
+    // 2. Logique de Session / Rôle
+    $user = auth()->user();
+    $userRole = null;
+
+    if ($user) {
+        // Si connecté, on récupère son rôle (ex: 'admin', 'user', etc.)
+        // Assure-toi que ton modèle User a bien une relation 'role'
+        $userRole = $user->role ? $user->role->name : 'Internal User';
+    }
+
     return Inertia::render('App', [
-    'resources' => $resources,
-    'categories' => $categories
-]);
-})->name('home'); // ✅ AJOUTÉ ICI
+        'resources' => $resources,
+        'categories' => $categories,
+        'auth' => [
+            'user' => $user,
+            'role' => $userRole,
+        ],
+        'isLoggedIn' => auth()->check() // Un booléen simple pour React
+    ]);
+})->name('home');
 
 Route::get('/timeline', [\App\Http\Controllers\TimelineController::class, 'index'])->name('timeline');
 

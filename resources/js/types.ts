@@ -1,23 +1,23 @@
 
 export enum UserRole {
-  GUEST = 'GUEST',
-  INTERNAL_USER = 'INTERNAL_USER',
-  TECH_MANAGER = 'TECH_MANAGER',
-  ADMIN = 'ADMIN'
+  GUEST = 'Guest',
+  INTERNAL_USER = 'Internal User',
+  TECH_MANAGER = 'Technical Resource Manager',
+  ADMIN = 'Data Center Administrator'
 }
 
 export enum ResourceType {
   SERVER = 'Server',
   VM = 'Virtual Machine',
   STORAGE = 'Storage',
-  NETWORK = 'Network'
+  NETWORK = 'Network Equipment'
 }
 
 export enum ResourceStatus {
-  AVAILABLE = 'Available',
-  RESERVED = 'Reserved',
-  MAINTENANCE = 'Maintenance',
-  OFFLINE = 'Offline'
+  AVAILABLE = 'available',
+  RESERVED = 'reserved',
+  MAINTENANCE = 'maintenance',
+  OFFLINE = 'offline'
 }
 
 export enum ReservationStatus {
@@ -40,6 +40,7 @@ export interface Resource {
     bandwidth?: string;
     os?: string;
     location: string;
+    form_factor?: string;
   };
   managerId: string;
 }

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Resource, ResourceStatus, ResourceType, UserRole } from '../types';
-import { Server, Cpu, Database, Network, MapPin, ChevronRight, Activity } from 'lucide-react';
+import { Server, Cpu, Database, Network, MapPin, ChevronRight, Activity, Settings, Cylinder, Disc3 } from 'lucide-react';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -60,20 +60,45 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, role, onReserve, 
               <span>{resource.specs.ram} RAM</span>
             </div>
           )}
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <MapPin size={14} className="text-slate-400" />
-            <span>{resource.specs.location}</span>
-          </div>
+          {resource.specs.form_factor && (
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Settings size={14} className="text-slate-400" />
+              <span>{resource.specs.form_factor}</span>
+            </div>
+          )}
+          {resource.specs.storage && (
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Cylinder size={14} className="text-slate-400" />
+              <span>{resource.specs.storage}</span>
+            </div>
+          )}
+          {resource.specs.os && (
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Disc3 size={14} className="text-slate-400" />
+              <span>{resource.specs.os}</span>
+            </div>
+          )}
+          {resource.specs.location && (
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <MapPin size={14} className="text-slate-400" />
+              <span>{resource.specs.location}</span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
         {role === UserRole.GUEST ? (
-          <span className="text-xs font-medium text-slate-400 italic">Login to reserve</span>
+          <a
+            href="/login"
+            className="text-xs font-medium text-slate-400 italic transition-all duration-300 ease-in-out hover:text-blue-500 hover:underline cursor-pointer"
+          >
+            Login to reserve
+          </a>
         ) : (
           <>
             {onReserve && resource.status === ResourceStatus.AVAILABLE && (
-              <button 
+              <button
                 onClick={() => onReserve(resource.id)}
                 className="text-sm font-semibold text-blue-600 flex items-center gap-1 hover:gap-2 transition-all"
               >
@@ -81,7 +106,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, role, onReserve, 
               </button>
             )}
             {onManage && (role === UserRole.TECH_MANAGER || role === UserRole.ADMIN) && (
-              <button 
+              <button
                 onClick={() => onManage(resource.id)}
                 className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors"
               >
