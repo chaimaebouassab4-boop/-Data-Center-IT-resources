@@ -6,6 +6,8 @@ import Dashboard from '../views/Dashboard';
 import Catalog from '../views/Catalog';
 import { Bell, User, Search, ShieldCheck, LogIn } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import { ReservationHistory } from './ReservationHistory';
+import { ReservationForm } from './ReservationForm';
 
 const App = ({ resources, auth, isLoggedIn }) => {
 
@@ -39,12 +41,13 @@ const App = ({ resources, auth, isLoggedIn }) => {
                 return <Dashboard resources={resources} role={currentRole} />;
             case 'catalog':
                 return <Catalog resources={resources} role={currentRole} />;
+            case 'new-reservation':
+                return (
+                    <ReservationForm onSuccess={() => {}} />
+                );
             case 'my-reservations':
                 return (
-                    <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-                        <h2 className="text-xl font-bold mb-2">My Bookings</h2>
-                        <p>You have no active reservations at this time.</p>
-                    </div>
+                    <ReservationHistory onNew={() => {}} />
                 );
             case 'requests':
                 return (

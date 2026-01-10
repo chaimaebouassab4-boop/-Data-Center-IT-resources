@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Server, Cpu, Database, Network, LayoutDashboard, Calendar, Settings, Shield, Bell, Users, BarChart3, AlertTriangle } from 'lucide-react';
+import { Server, Cpu, Database, Network, LayoutDashboard, Calendar, Settings, Shield, Bell, Users, BarChart3, AlertTriangle, Plus } from 'lucide-react';
 import { ResourceType, ResourceStatus, ReservationStatus, UserRole } from './types';
 
 export const MOCK_RESOURCES = [
@@ -70,6 +70,7 @@ export const MOCK_RESERVATIONS = [
 export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: [UserRole.ADMIN, UserRole.TECH_MANAGER, UserRole.INTERNAL_USER] },
   { id: 'catalog', label: 'Resources', icon: <Server size={20} />, roles: [UserRole.ADMIN, UserRole.TECH_MANAGER, UserRole.INTERNAL_USER, UserRole.GUEST] },
+  { id: 'new-reservation', label: 'New Reservation', icon: <Plus size={20} />, roles: [UserRole.INTERNAL_USER] },
   { id: 'my-reservations', label: 'My Bookings', icon: <Calendar size={20} />, roles: [UserRole.INTERNAL_USER] },
   { id: 'requests', label: 'Pending Requests', icon: <Shield size={20} />, roles: [UserRole.TECH_MANAGER, UserRole.ADMIN] },
   { id: 'users', label: 'User Management', icon: <Users size={20} />, roles: [UserRole.ADMIN] },
