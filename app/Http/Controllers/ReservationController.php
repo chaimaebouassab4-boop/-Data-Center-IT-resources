@@ -14,31 +14,40 @@ class ReservationController extends Controller
     {
         $query = Reservation::with('resource')->where('user_id', Auth::id());
 
+        // --- Garde ta logique de filtrage actuelle ---
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
 
         if ($request->has('resource_name') && $request->resource_name != '') {
-            $query->whereHas('resource', function($q) use ($request) {
+            $query->whereHas('resource', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->resource_name . '%');
             });
         }
 
-        // Default sort by created_at desc, but allow sorting by start_time
         $sort = $request->get('sort', 'created_at');
         $query->orderBy($sort, 'desc');
 
+        // 2. Utilise la pagination ou get()
         $reservations = $query->paginate(10);
-        
-        return view('user.reservations.index', compact('reservations'));
+
+        // 3. CHANGE CECI : Renvoie vers ton composant React
+        return \Inertia\Inertia::render('MyReservations', [
+            'reservations' => $reservations,
+            'filters' => $request->all(['status', 'resource_name', 'sort']) // Pour garder les filtres actifs dans l'UI
+        ]);
     }
 
     public function create(Request $request)
     {
-        $resources = Resource::where('status', 'available')->where('is_active', true)->get();
-        $selectedResourceId = $request->query('resource_id');
-        
-        return view('user.reservations.create', compact('resources', 'selectedResourceId'));
+        $resources = Resource::where('status', 'available')
+            ->where('is_active', true)
+            ->get();
+
+        return \Inertia\Inertia::render('ReservationForm', [
+            'resources' => $resources,
+            'selectedResourceId' => $request->query('resource_id')
+        ]);
     }
 
     public function store(Request $request)
@@ -51,7 +60,7 @@ class ReservationController extends Controller
         ]);
 
         $resource = Resource::findOrFail($request->resource_id);
-        
+
         // 1. Check if resource is available (status check)
         if ($resource->status !== 'available') {
             return back()->withInput()->with('error', 'This resource is currently not available (Maintenance or Reserved manually).');
@@ -67,19 +76,20 @@ class ReservationController extends Controller
             ->where(function ($query) use ($start, $end) {
                 $query->where(function ($q) use ($start, $end) {
                     $q->where('start_time', '<', $end)
-                      ->where('end_time', '>', $start);
+                        ->where('end_time', '>', $start);
                 });
             })
             ->exists();
 
         if ($conflicts) {
-            return back()->withInput()->with('error', 'The selected period conflicts with an existing reservation.');
+            // Avec Inertia, les erreurs retournées ici arrivent dans 'errors' du useForm
+            return back()->withErrors(['error' => 'The selected period conflicts with an existing reservation.']);
         }
 
         // Create Reservation
         $reservation = Reservation::create([
             'user_id' => Auth::id(),
-            'resource_id' => $resource->id,
+            'resource_id' => $request->resource_id,
             'start_time' => $start,
             'end_time' => $end,
             'status' => 'pending',
@@ -92,7 +102,7 @@ class ReservationController extends Controller
             'details' => "Reservation #{$reservation->id} created for resource: {$resource->name}",
         ]);
 
-        return redirect()->route('user.reservations.index')->with('success', 'Reservation request submitted successfully.');
+        return back()->with('success', 'Reservation created');;
     }
 
     public function show(Reservation $reservation)
@@ -110,13 +120,17 @@ class ReservationController extends Controller
             abort(403);
         }
 
+        // Protection contre l'annulation de réservations déjà traitées
         if ($reservation->status === 'active' || $reservation->status === 'completed') {
             return back()->with('error', 'Cannot cancel active or completed reservations.');
         }
 
+        // On change le statut
         $reservation->update(['status' => 'cancelled']);
-        
-        return redirect()->route('user.reservations.index')->with('success', 'Reservation cancelled.');
+
+        // --- IMPORTANT POUR INERTIA ---
+        // Reste sur la page actuelle pour que React reçoive les nouvelles props
+        return back()->with('success', 'Reservation cancelled.');
     }
 
     // Manager Methods
@@ -148,18 +162,18 @@ class ReservationController extends Controller
         if ($request->status === 'approved') {
             $start = $reservation->start_time;
             $end = $reservation->end_time;
-            
+
             $conflicts = Reservation::where('resource_id', $reservation->resource_id)
                 ->where('id', '!=', $reservation->id)
                 ->whereIn('status', ['approved', 'active'])
                 ->where(function ($query) use ($start, $end) {
                     $query->where(function ($q) use ($start, $end) {
                         $q->where('start_time', '<', $end)
-                          ->where('end_time', '>', $start);
+                            ->where('end_time', '>', $start);
                     });
                 })
                 ->exists();
-            
+
             if ($conflicts) {
                 return back()->with('error', 'Cannot approve. Conflict detected with another approved reservation.');
             }

@@ -1,36 +1,45 @@
-
-import React, { useState } from 'react';
-import { ResourceType, UserRole, ResourceStatus } from '../types';
-import { MOCK_RESOURCES } from '../constants';
+import React, { useState, useMemo } from 'react';
+import { UserRole } from '../types';
 import ResourceCard from '../components/ResourceCard';
-// Added Server to imports from lucide-react
 import { Search, Filter, Grid, List as ListIcon, Server } from 'lucide-react';
 
 interface CatalogProps {
   role: UserRole;
   resources: any[];
+  setActiveTab: (tab: any, isResource?: boolean) => void;
 }
 
-const getMockResource = (resource: any) => {
-  return {
-    id: resource.id,
-    name: resource.name,
-    type: resource.category.name,
-    status: resource.status,
-    specs: resource.specifications,
-    managerId: resource.manager_id
-  };
-}
-
-const Catalog: React.FC<CatalogProps> = ({ resources, role }) => {
+const Catalog: React.FC<CatalogProps> = ({ resources, role, setActiveTab }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  // 1. Extraire la liste unique des catégories pour le menu déroulant
+  // On utilise useMemo pour ne pas recalculer à chaque rendu
+  const categories = useMemo(() => {
+    const names = resources.map(r => r.category?.name).filter(Boolean);
+    return Array.from(new Set(names)); // Supprime les doublons
+  }, [resources]);
+
+  // 2. Logique de filtrage corrigée
   const filtered = resources.filter(r => {
     const matchesSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'All' || r.type === filterType;
+
+    // CORRECTION ICI : On accède à r.category.name
+    const categoryName = r.category?.name || '';
+    const matchesType = filterType === 'All' || categoryName === filterType;
+
     return matchesSearch && matchesType;
+  });
+
+  // 3. Transformation pour le composant ResourceCard
+  const formatResource = (resource: any) => ({
+    id: resource.id,
+    name: resource.name,
+    type: resource.category?.name || 'Uncategorized',
+    status: resource.status,
+    specs: resource.specifications,
+    managerId: resource.manager_id
   });
 
   return (
@@ -62,7 +71,7 @@ const Catalog: React.FC<CatalogProps> = ({ resources, role }) => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
-            placeholder="Search by name, location, or manager..."
+            placeholder="Search resources..."
             className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -71,7 +80,7 @@ const Catalog: React.FC<CatalogProps> = ({ resources, role }) => {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Filter size={16} className="text-slate-400" />
-            <span className="text-sm font-medium text-slate-700">Type:</span>
+            <span className="text-sm font-medium text-slate-700">Category:</span>
           </div>
           <select
             className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -79,33 +88,39 @@ const Catalog: React.FC<CatalogProps> = ({ resources, role }) => {
             onChange={(e) => setFilterType(e.target.value)}
           >
             <option value="All">All Categories</option>
-            {Object.values(ResourceType).map(type => (
-              <option key={type} value={type}>{type}</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Grid / List View */}
       <div className={viewMode === 'grid'
         ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         : "flex flex-col gap-4"
       }>
         {filtered.length > 0 ? (
-          filtered.map(resource => {
-            const res = getMockResource(resource);
-
-            return <ResourceCard
-              key={res.id}
-              resource={res}
+          filtered.map(resource => (
+            <ResourceCard
+              key={resource.id}
+              resource={formatResource(resource)}
               role={role}
-              onReserve={(id) => alert(`Reserve action triggered for ${id}`)}
+              onReserve={(id) => {
+                setActiveTab(['new-reservation', id], true);
+              }}
             />
-          })
+          ))
         ) : (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-400">
+          <div className="col-span-full py-24 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
             <Server size={48} className="mb-4 opacity-20" />
             <p className="text-lg font-medium">No resources found matching your criteria.</p>
+            <button
+              onClick={() => { setSearchTerm(''); setFilterType('All'); }}
+              className="mt-2 text-blue-600 hover:underline text-sm font-medium"
+            >
+              Clear all filters
+            </button>
           </div>
         )}
       </div>
