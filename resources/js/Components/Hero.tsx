@@ -23,12 +23,12 @@ export default function Hero() {
           <div className={`flex items-center space-x-4 transition-all duration-700 ${isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
             {/* Enhanced Logo */}
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
-             <div className="relative p-3 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-br rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
+      <div className="relative">
   <img
     src={logo}
     alt="DataCenterHub Logo"
-    className="w-10 h-10 object-contain"
+    className="w-90 h-90 object-contain"
   />
 </div>
 

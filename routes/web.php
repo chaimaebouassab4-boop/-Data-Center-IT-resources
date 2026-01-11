@@ -68,6 +68,24 @@ Route::middleware('auth')->group(function () {
         Route::post('/hybrid/sync', [\App\Http\Controllers\CloudController::class, 'sync'])->name('hybrid.sync');
     });
 
+    // RESOURCE CATALOG ROUTE (Public/Read-Only View)
+// ============================================
+Route::get('/resources', function (\Illuminate\Http\Request $request) {
+    $query = \App\Models\Resource::with('category')->where('is_active', true);
+    
+    if ($request->has('category_id') && $request->category_id != '') {
+        $query->where('category_id', $request->category_id);
+    }
+
+    $resources = $query->get();
+    $categories = \App\Models\Category::all();
+    
+    return Inertia::render('App', [  // Change to 'ResourceCatalog' if you've renamed the component
+        'resources' => $resources,
+        'categories' => $categories,
+    ]);
+})->name('resources.index');
+
     // ============================================
     // MANAGER ROUTES
     // ============================================

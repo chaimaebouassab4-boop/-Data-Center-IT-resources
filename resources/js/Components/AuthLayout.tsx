@@ -27,11 +27,11 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
       {/* Left Panel: Content / Form */}
       <div className="flex flex-col flex-1 px-6 py-12 lg:px-24 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="relative p-3 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl shadow-lg">
+    <div className="relative p-4 bg-gradient-to-br rounded-xl shadow-lg">
   <img
     src={logo}
     alt="DataCenterHub Logo"
-    className="w-10 h-10 object-contain"
+    className="w-90 h-90 object-contain" 
   />
 </div>
 
