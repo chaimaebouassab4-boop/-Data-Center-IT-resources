@@ -35,9 +35,14 @@ export default function Hero() {
 </button>
 
             
-            <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105">
-              Get Started
-            </button>
+            <button 
+            
+            
+            onClick={() => window.location.href = '/dashboard'}
+  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105"
+>
+  Get Started
+</button>
           </div>
         </div>
       </nav>
