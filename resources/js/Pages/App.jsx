@@ -9,15 +9,26 @@ import { router } from '@inertiajs/react';
 import { ReservationHistory } from './ReservationHistory';
 import { ReservationForm } from './ReservationForm';
 
-const App = ({ resources, auth, isLoggedIn }) => {
+const App = ({ resources, auth, isLoggedIn, reservations }) => {
 
     const [currentRole, setCurrentRole] = useState(auth.role || UserRole.GUEST);
-    const [activeTab, setActiveTab] = useState(isLoggedIn ? 'dashboard' : 'catalog');
+    const [activeTab, setActiveTab] = useState(isLoggedIn ? ['dashboard'] : ['catalog']);
+    const [prevActiveTab, setPrevActiveTab] = useState();
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-     useEffect(() => {
+    const changeActiveTab = (value, isArray) => {
+        if (value === activeTab[0]) return;
+        
+        setPrevActiveTab(activeTab[0]);
+        if (isArray) setActiveTab(value);
+        else {
+            setActiveTab([value]);
+        }
+    };
+
+    useEffect(() => {
         setCurrentRole(auth.role || UserRole.GUEST);
-        setActiveTab(isLoggedIn ? 'dashboard' : 'catalog');
+        changeActiveTab(isLoggedIn ? 'dashboard' : 'catalog');
     }, [auth.role]);
 
     // Mock roles switching for demo purposes
@@ -29,25 +40,30 @@ const App = ({ resources, auth, isLoggedIn }) => {
 
         // Auto reset tab if role doesn't have access
         if (roles[nextIndex] === UserRole.GUEST) {
-            setActiveTab('catalog');
-        } else if (activeTab === 'users' && roles[nextIndex] !== UserRole.ADMIN) {
-            setActiveTab('dashboard');
+            changeActiveTab('catalog');
+        } else if (activeTab[0] === 'users' && roles[nextIndex] !== UserRole.ADMIN) {
+            changeActiveTab('dashboard');
         }
     };
 
     const renderContent = () => {
-        switch (activeTab) {
+        switch (activeTab[0]) {
             case 'dashboard':
                 return <Dashboard resources={resources} role={currentRole} />;
             case 'catalog':
-                return <Catalog resources={resources} role={currentRole} />;
+                return <Catalog setActiveTab={changeActiveTab} resources={resources} role={currentRole} />;
             case 'new-reservation':
+                if (activeTab[1] !== undefined) {
+                    return (
+                        <ReservationForm onHistoryBack={() => setActiveTab([prevActiveTab])} selectedResourceId={activeTab[1]} resources={resources} onSuccess={() => setActiveTab('my-reservations')} />
+                    );
+                }
                 return (
-                    <ReservationForm onSuccess={() => {}} />
+                    <ReservationForm onHistoryBack={() => setActiveTab([prevActiveTab])} resources={resources} onSuccess={() => changeActiveTab('my-reservations')} />
                 );
             case 'my-reservations':
                 return (
-                    <ReservationHistory onNew={() => {}} />
+                    <ReservationHistory reservations={reservations} onNew={() => changeActiveTab('new-reservation')} />
                 );
             case 'requests':
                 return (
@@ -116,8 +132,8 @@ const App = ({ resources, auth, isLoggedIn }) => {
         <div className="min-h-screen bg-slate-50">
             <Sidebar
                 currentRole={currentRole}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
+                activeTab={activeTab[0]}
+                onTabChange={changeActiveTab}
                 onLogout={() => {
                     if (confirm("Are you sure you want to log out?")) {
                         router.post('/logout', {}, {
