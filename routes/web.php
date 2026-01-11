@@ -5,72 +5,68 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 
-// Public Routes - AJOUT DU NOM 'home'
-Route::get('/', function (\Illuminate\Http\Request $request) {
-    // 1. On récupère les ressources de base (communs à tous)
-    $query = \App\Models\Resource::with('category')->where('is_active', true);
-    
-    if ($request->has('category_id') && $request->category_id != '') {
-        $query->where('category_id', $request->category_id);
-    }
+// ============================================
+// PAGE D'ACCUEIL PUBLIQUE (Landing Page)
+// ============================================
+Route::get('/', function () {
+    // Statistiques pour la page d'accueil
+    $totalResources = \App\Models\Resource::count();
+    $activeReservations = \App\Models\Resource::where('is_active', true)->count();
+    $utilizationRate = $totalResources > 0 
+        ? round(($activeReservations / $totalResources) * 100) . '%' 
+        : '0%';
 
-    $resources = $query->get();
-    $categories = \App\Models\Category::all();
-
-    // 2. Logique de Session / Rôle
-    $user = auth()->user();
-    $userRole = null;
-
-    if ($user) {
-        // Si connecté, on récupère son rôle (ex: 'admin', 'user', etc.)
-        // Assure-toi que ton modèle User a bien une relation 'role'
-        $userRole = $user->role ? $user->role->name : 'Internal User';
-    }
-
-    return Inertia::render('App', [
-        'resources' => $resources,
-        'categories' => $categories,
-        'auth' => [
-            'user' => $user,
-            'role' => $userRole,
-        ],
-        'isLoggedIn' => auth()->check() // Un booléen simple pour React
+    return Inertia::render('Home', [
+        'totalResources' => $totalResources,
+        'utilizationRate' => $utilizationRate,
+        'activeReservations' => $activeReservations,
     ]);
 })->name('home');
 
+// ============================================
+// PAGE TIMELINE PUBLIQUE
+// ============================================
 Route::get('/timeline', [\App\Http\Controllers\TimelineController::class, 'index'])->name('timeline');
 
-// Authenticated Routes
+// ============================================
+// AUTHENTICATION ROUTES
+// ============================================
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ============================================
+// AUTHENTICATED ROUTES
+// ============================================
 Route::middleware('auth')->group(function () {
+    
+    // Notifications (disponible pour tous les utilisateurs connectés)
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
-});
 
-// Authentication Routes
-Route::get('/auth', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-
-// Route pour afficher le formulaire d'inscription
-Route::get('/auth/signup', [AuthController::class, 'showRegister'])->name('register');
-
-// Route pour traiter l'inscription (méthode POST)
-Route::post('/register', [AuthController::class, 'register']);
-
-// Protected Routes
-Route::middleware(['auth'])->group(function () {
-    
-    // Admin Dashboard
+    // ============================================
+    // ADMIN ROUTES
+    // ============================================
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+        
+        // Categories Management
         Route::resource('categories', \App\Http\Controllers\CategoryController::class);
+        
+        // Users Management
         Route::resource('users', \App\Http\Controllers\UserController::class);
+        
+        // Logs
         Route::get('/logs', [\App\Http\Controllers\LogController::class, 'index'])->name('logs.index');
         
         // Rack Management
         Route::resource('racks', \App\Http\Controllers\RackController::class);
+        
+        // Rooms Management
+        Route::resource('rooms', \App\Http\Controllers\RoomController::class);
 
         // Monitoring
         Route::get('/monitoring', [\App\Http\Controllers\MonitoringController::class, 'index'])->name('monitoring.index');
@@ -84,9 +80,6 @@ Route::middleware(['auth'])->group(function () {
         // Capacity Planning
         Route::get('/capacity', [\App\Http\Controllers\CapacityController::class, 'index'])->name('capacity.index');
         
-        // Rooms
-        Route::resource('rooms', \App\Http\Controllers\RoomController::class);
-        
         // Reports & Analytics
         Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     
@@ -95,21 +88,32 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/hybrid/sync', [\App\Http\Controllers\CloudController::class, 'sync'])->name('hybrid.sync');
     });
 
-    // Manager Dashboard
+    // ============================================
+    // MANAGER ROUTES
+    // ============================================
     Route::middleware(['role:manager'])->prefix('manager')->name('manager.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'manager'])->name('dashboard');
+        
+        // Resources Management
         Route::resource('resources', \App\Http\Controllers\ResourceController::class);
         
-        // Manager Reservation Management
+        // Reservations Management
         Route::get('/reservations', [\App\Http\Controllers\ReservationController::class, 'managerIndex'])->name('reservations.index');
         Route::patch('/reservations/{reservation}', [\App\Http\Controllers\ReservationController::class, 'updateStatus'])->name('reservations.update');
     });
 
-    // User Dashboard
+    // ============================================
+    // USER ROUTES
+    // ============================================
     Route::middleware(['role:user'])->prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
-        Route::resource('reservations', \App\Http\Controllers\ReservationController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
-        Route::resource('incidents', \App\Http\Controllers\IncidentController::class)->only(['index', 'create', 'store']);
+        
+        // Reservations
+        Route::resource('reservations', \App\Http\Controllers\ReservationController::class)
+            ->only(['index', 'create', 'store', 'show', 'destroy']);
+        
+        // Incidents
+        Route::resource('incidents', \App\Http\Controllers\IncidentController::class)
+            ->only(['index', 'create', 'store']);
     });
-
 });
