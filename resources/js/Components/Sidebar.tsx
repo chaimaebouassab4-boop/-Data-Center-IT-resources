@@ -21,7 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentRole, activeTab, onTabChange, 
         <div className="bg-blue-600 p-2 rounded-lg">
           <Database size={24} className="text-white" />
         </div>
-        <h1 className="font-bold text-xl tracking-tight">Nexus DC</h1>
+        <h1 className="font-bold text-xl tracking-tight">DataCenterHub</h1>
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-1">

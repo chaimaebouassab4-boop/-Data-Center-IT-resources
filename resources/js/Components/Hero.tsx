@@ -27,9 +27,14 @@ export default function Hero() {
           </div>
 
           <div className={`flex items-center space-x-4 transition-all duration-700 delay-200 ${isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-            <button className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
-              Sign In
-            </button>
+           <button
+  className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+  onClick={() => window.location.href = '/auth'}
+>
+  Sign In
+</button>
+
+            
             <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105">
               Get Started
             </button>
