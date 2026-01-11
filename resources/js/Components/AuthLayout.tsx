@@ -1,4 +1,5 @@
-import { Database } from 'lucide-react';
+import logo from '@/Pages/image.png';
+import { ChevronRight } from 'lucide-react';
 import React from 'react';
 
 interface AuthLayoutProps {
@@ -26,12 +27,14 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
       {/* Left Panel: Content / Form */}
       <div className="flex flex-col flex-1 px-6 py-12 lg:px-24 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Database size={24} className="text-white" />
-            </div>
-            <h1 className="font-bold text-xl tracking-tight text-white">DataCenterHub</h1>
-          </div>
+          <div className="relative p-3 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl shadow-lg">
+  <img
+    src={logo}
+    alt="DataCenterHub Logo"
+    className="w-10 h-10 object-contain"
+  />
+</div>
+
         </div>
 
         <div className="flex-1 flex items-center justify-center">

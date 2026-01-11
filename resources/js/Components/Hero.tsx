@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Server, ChevronRight } from 'lucide-react';
+import logo from '@/Pages/image.png';
+import { ChevronRight } from 'lucide-react';
 
 export default function Hero() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -19,30 +20,39 @@ export default function Hero() {
 
       <nav className="relative z-10 container mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
-          <div className={`flex items-center space-x-3 transition-all duration-700 ${isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
-              <Server className="w-6 h-6 text-white" />
+          <div className={`flex items-center space-x-4 transition-all duration-700 ${isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
+            {/* Enhanced Logo */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
+             <div className="relative p-3 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl shadow-lg">
+  <img
+    src={logo}
+    alt="DataCenterHub Logo"
+    className="w-10 h-10 object-contain"
+  />
+</div>
+
             </div>
-            <span className="text-2xl font-bold text-white">DataCenter<span className="text-blue-400">Hub</span></span>
+            <div className="flex flex-col">
+              <span className="text-3xl font-black text-white tracking-tight">DataCenter<span className="text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text">Hub</span></span>
+              <span className="text-xs text-gray-400 font-semibold tracking-widest">RESOURCE MANAGEMENT</span>
+            </div>
           </div>
 
           <div className={`flex items-center space-x-4 transition-all duration-700 delay-200 ${isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-           <button
-  className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
-  onClick={() => window.location.href = '/auth'}
->
-  Sign In
-</button>
+            <button
+              className="px-4 py-2 text-gray-300 hover:text-white transition-colors font-medium"
+              onClick={() => window.location.href = '/auth'}
+            >
+              Sign In
+            </button>
 
-            
             <button 
-            
-            
-            onClick={() => window.location.href = '/dashboard'}
-  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105"
->
-  Get Started
-</button>
+              onClick={() => window.location.href = '/dashboard'}
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg transition-all hover:scale-105 font-semibold shadow-lg shadow-blue-500/25"
+            >
+              Get Started
+            </button>
           </div>
         </div>
       </nav>
@@ -67,12 +77,12 @@ export default function Hero() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 flex items-center space-x-2">
-                <span className="font-semibold">Start Reserving</span>
+              <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 flex items-center space-x-2 font-semibold">
+                <span>Start Reserving</span>
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
 
-              <button className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all hover:scale-105 border border-white/10 backdrop-blur-sm">
+              <button className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all hover:scale-105 border border-white/10 backdrop-blur-sm font-semibold">
                 View Resources
               </button>
             </div>
